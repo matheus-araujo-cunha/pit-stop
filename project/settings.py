@@ -45,6 +45,7 @@ DJANGO_APPS = [
 
 MY_APPS = [
     "users",
+    "stock",
 ]
 
 THIRD_PARTY_APPS = [
