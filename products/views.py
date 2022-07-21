@@ -12,3 +12,7 @@ class ProductsView(generics.ListCreateAPIView):
         valid_stock = serializer.validated_data.get("stock")
         stock = Stock.objects.create(**valid_stock)
         serializer.save(stock=stock)
+
+class ProductsViewId(generics.RetrieveUpdateDestroyAPIView):
+    queryset:Products.objects.all()
+    serializer_class = ProductsSerializer
