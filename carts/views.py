@@ -1,11 +1,12 @@
-from xml.dom import NotFoundErr
 from rest_framework import generics
+from django.core.exceptions import ObjectDoesNotExist
 
 from carts.models import Cart
 from carts.permissions import IsOwnerCart
 from carts.serializers import CartSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from products.models import Products
 
 from users.models import User
 
@@ -23,23 +24,34 @@ class CartView(CreateDestroyAPIView):
     serializer_class = CartSerializer
 
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        user: User = User.objects.get(self.request.user)
-        products = serializer.validated_data["products"]
+        user: User = User.objects.get(email=self.request.user)
 
-        cart_user = Cart.objects.get(user=user)
+        print("\n\n", user, "\n\n")
 
-        if not cart_user:
-            return serializer.save(user=user, products=products)
+        list_uuid_products = serializer.validated_data["products"]
+        try:
+            cart_user: Cart = Cart.objects.get(user=user)
+            print("PRODUTOSSSSS", cart_user.products)
+            for product in list_uuid_products:
+                new_product = Products.objects.get(product_uuid=product)
+                cart_user.products.add(new_product)
 
-        for product in products:
-            new_product = Products.objects.get(name=product)
-            if not new_product:
-                raise NotFoundErr()
-            cart_user.add(new_product)
+            print(50 * "=", cart_user, 50 * "=")
 
-        return cart_user
+            return cart_user
+        except ObjectDoesNotExist:
+
+            products = []
+            for product in list_uuid_products:
+                products.append(
+                    Products.objects.get(product_uuid=product["product_uuid"])
+                )
+            serializer.save(user=user, products=products)
+            cart_user = Cart.objects.get(user=user)
+            return
 
         # for product in products:
         #     new_product = Products.objects.get(name=product)

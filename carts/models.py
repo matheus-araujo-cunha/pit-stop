@@ -7,6 +7,4 @@ class Cart(models.Model):
         "users.User", on_delete=models.CASCADE, related_name="cart"
     )
 
-    products = models.ManyToManyField(
-        "products.Product", on_delete=models.CASCADE, related_name="carts", null=True
-    )
+    products = models.ManyToManyField("products.Products", related_name="carts")
