@@ -10,18 +10,23 @@ class ProductCartSerializer(serializers.Serializer):
 
 
 class CartSerializer(serializers.ModelSerializer):
-    products = ProductCartSerializer(many=True)
+    list_products = ProductCartSerializer(
+        many=True,
+        write_only=True,
+    )
+    cart_products = ProductsSerializer(read_only=True, many=True, source="products")
 
     class Meta:
         model = Cart
-        fields = ["id", "products", "user"]
+        fields = ["id", "cart_products", "user", "list_products"]
         read_only_fields = ["user"]
 
-    def create(self, validate_data: dict):
-        user = validate_data.pop("user")
-        cart: Cart = Cart.objects.create(user=user)
-        print(50 * "=", "TO NO CREATEEEE", 50 * "=")
+    def create(self, validated_data: dict):
+        cart_user: Cart = Cart.objects.get(user=validated_data["user"])
 
-        for product in validate_data["products"]:
-            cart.products.add(product)
-        return cart
+        for product in validated_data["list_uuid"]:
+            new_product = Products.objects.get(product_uuid=product["product_uuid"])
+            cart_user.products.add(new_product)
+        return cart_user
+
+
