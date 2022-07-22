@@ -1,5 +1,7 @@
 from rest_framework import generics
-from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.response import Response
+from rest_framework import status
+
 
 from carts.models import Cart
 from carts.permissions import IsOwnerCart
@@ -28,42 +30,31 @@ class CartView(CreateDestroyAPIView):
 
     def perform_create(self, serializer):
         user: User = User.objects.get(email=self.request.user)
+        list_uuid_products = serializer.validated_data["list_products"]
 
-        print("\n\n", user, "\n\n")
+        return serializer.save(user=user, list_uuid=list_uuid_products)
 
-        list_uuid_products = serializer.validated_data["products"]
-        try:
-            cart_user: Cart = Cart.objects.get(user=user)
-            print("PRODUTOSSSSS", cart_user.products)
-            for product in list_uuid_products:
-                new_product = Products.objects.get(product_uuid=product)
-                cart_user.products.add(new_product)
+    def destroy(self, request, *args, **kwargs):
+        user = User.objects.get(email=self.request.user)
 
-            print(50 * "=", cart_user, 50 * "=")
+        cart = Cart.objects.get(user=user)
+        print("CARRINHO", cart)
 
-            return cart_user
-        except ObjectDoesNotExist:
-
-            products = []
-            for product in list_uuid_products:
-                products.append(
-                    Products.objects.get(product_uuid=product["product_uuid"])
-                )
-            serializer.save(user=user, products=products)
-            cart_user = Cart.objects.get(user=user)
-            return
-
-        # for product in products:
-        #     new_product = Products.objects.get(name=product)
-        #     if not new_product:
-        #         raise NotFoundErr()
-        #     user.cart.add(new_product)
-
-    def perform_destroy(self, instance):
-        instance.clear()
+        cart.products.clear()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        # instance.clear()
 
 
-class CartUpdateProductView(generics.DestroyAPIView):
+class RetrieveCartProductsView(generics.RetrieveAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+
+
+class CartDeleteProductView(generics.DestroyAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
 
@@ -73,8 +64,9 @@ class CartUpdateProductView(generics.DestroyAPIView):
     lookup_field = "product_id"
 
     def destroy(self, request, *args, **kwargs):
-        product = Product.objects.get(id=self.kwargs.get("product_id"))
+        product = Products.objects.get(product_uuid=self.kwargs.get("product_id"))
 
         cart = Cart.objects.get(user=self.request.user)
 
         cart.products.remove(product)
+        return Response(status=status.HTTP_204_NO_CONTENT)
