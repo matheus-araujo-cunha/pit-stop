@@ -11,6 +11,7 @@ class Products(models.Model):
     warrant = models.IntegerField()
     img = models.TextField()
     price= models.DecimalField(max_digits=10, decimal_places=2)
+    categorie = models.CharField(max_length=50)
 
     stock = models.OneToOneField(
         "stock.Stock", on_delete=models.CASCADE, related_name="product"
