@@ -1,4 +1,3 @@
-from dataclasses import fields
 from rest_framework import serializers
 from products.models import Products
 class ProductsSerializer(serializers.ModelSerializer):
@@ -15,3 +14,4 @@ class ProductsSerializer(serializers.ModelSerializer):
         "stock",
         "orders",
     )
+        
