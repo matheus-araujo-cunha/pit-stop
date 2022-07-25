@@ -2,8 +2,9 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 
+from .serializers import RetrieveProductsSerialize
 
-from carts.models import Cart
+from carts.models import Cart, CartProduct
 from carts.permissions import IsOwnerCart
 from carts.serializers import CartSerializer
 from rest_framework.authentication import TokenAuthentication
@@ -28,6 +29,22 @@ class CartView(CreateDestroyAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        products = CartProduct.objects.filter(cart=serializer.data["id"])
+
+        products = RetrieveProductsSerialize(products, many=True)
+
+        return Response(
+            {**serializer.data, "products": products.data},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
     def perform_create(self, serializer):
         user: User = User.objects.get(email=self.request.user)
         list_uuid_products = serializer.validated_data["list_products"]
@@ -38,11 +55,12 @@ class CartView(CreateDestroyAPIView):
         user = User.objects.get(email=self.request.user)
 
         cart = Cart.objects.get(user=user)
-        print("CARRINHO", cart)
 
         cart.products.clear()
         return Response(status=status.HTTP_204_NO_CONTENT)
-        # instance.clear()
+
+    def perform_destroy(self, instance):
+        return super().perform_destroy(instance)
 
 
 class RetrieveCartProductsView(generics.RetrieveAPIView):
@@ -52,6 +70,20 @@ class RetrieveCartProductsView(generics.RetrieveAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
+
+    def retrieve(self, request, *args, **kwargs):
+        user = User.objects.get(email=self.request.user)
+
+        cart = Cart.objects.get(user=user)
+
+        products = CartProduct.objects.filter(cart=cart)
+
+        products_serialized = RetrieveProductsSerialize(products, many=True)
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance)
+
+        return Response({**serializer.data, "products": products_serialized.data})
 
 
 class CartDeleteProductView(generics.DestroyAPIView):
@@ -68,5 +100,12 @@ class CartDeleteProductView(generics.DestroyAPIView):
 
         cart = Cart.objects.get(user=self.request.user)
 
-        cart.products.remove(product)
+        cart_product = CartProduct.objects.get(product=product)
+
+        if cart_product.amount > 1:
+            cart_product.amount -= 1
+            cart_product.save()
+        else:
+            cart.products.remove(product)
+
         return Response(status=status.HTTP_204_NO_CONTENT)

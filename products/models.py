@@ -8,7 +8,7 @@ class Products(models.Model):
     name = models.CharField(max_length=60,unique=True)
     description = models.CharField(max_length=200)
     manufacturer = models.CharField(max_length=50)
-    warrant = models.IntegerField()
+    warranty = models.IntegerField()
     img = models.TextField()
     price= models.DecimalField(max_digits=10, decimal_places=2)
     categorie = models.CharField(max_length=50)
