@@ -17,4 +17,4 @@ class Products(models.Model):
         "stock.Stock", on_delete=models.CASCADE, related_name="product"
     )
 
-    # orders = models.ManyToManyField("orders.Orders", related_name="tags")
+    order = models.ManyToManyField("order.Order", related_name="products")
