@@ -1,7 +1,11 @@
+from django.forms import model_to_dict
 from rest_framework import serializers
 from django.db import models
+from carts.models import Cart
 
-from order.models import Order
+from orders.models import Order, OrderProducts
+from products.models import Products
+from products.serializers import ProductsSerializer
 
 
 class OrderProductSerializer(serializers.Serializer):
@@ -10,8 +14,7 @@ class OrderProductSerializer(serializers.Serializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(read_only=True)
-
+    products = ProductsSerializer(many=True,read_only=True)
     class Meta:
         model = Order
-        fields = ["id","date"]
-        # read_only_fields = ["users"]
+        fields = ["id","date","products"]
