@@ -15,7 +15,7 @@ class ProductsSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "manufacturer",
-            "warrant",
+            "warranty",
             "price",
             "categorie",
             "stock",

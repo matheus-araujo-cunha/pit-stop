@@ -1,12 +1,38 @@
 from rest_framework import serializers
+from carts.exceptions import NoProductsInStockError
 from products.models import Products
 
-from products.serializers import ProductsSerializer
-from .models import Cart
+from django.core.exceptions import ObjectDoesNotExist
+
+
+from .models import Cart, CartProduct
+from users.serializers import UserSerializer
 
 
 class ProductCartSerializer(serializers.Serializer):
     product_uuid = serializers.UUIDField()
+
+
+class AddProductsInCartSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = CartProduct
+        exclude = ["cart"]
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Products
+        exclude = ["stock", "description", "warranty", "price"]
+
+
+class RetrieveCartProductsSerializer(serializers.ModelSerializer):
+    item = ProductSerializer(read_only=True, source="product")
+
+    class Meta:
+        model = CartProduct
+        exclude = ["cart", "product"]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -14,15 +40,21 @@ class CartSerializer(serializers.ModelSerializer):
         many=True,
         write_only=True,
     )
-    cart_products = ProductsSerializer(read_only=True, many=True, source="products")
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Cart
-        fields = ["id", "cart_products", "user", "list_products"]
-        read_only_fields = ["user"]
+        fields = [
+            "id",
+            "user",
+            "list_products",
+        ]
+        read_only_fields = [
+            "user",
+        ]
 
     def create(self, validated_data: dict):
-        cart_user: Cart = Cart.objects.get(user=validated_data["user"])
+        cart_user, _ = Cart.objects.get_or_create(user=validated_data["user"])
 
         for product in validated_data["list_uuid"]:
             new_product: Products = Products.objects.get(
@@ -53,4 +85,6 @@ class CartSerializer(serializers.ModelSerializer):
                     "product": new_product,
                 }
 
+                CartProduct.objects.create(**mapped_product)
 
+        return cart_user
