@@ -1,0 +1,2 @@
+class NoProductsInStockError(Exception):
+    pass

@@ -2,7 +2,14 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import RetrieveProductsSerialize
+from carts.exceptions import NoProductsInStockError
+
+from django.core.exceptions import ObjectDoesNotExist
+
+from .serializers import (
+    AddProductsInCartSerializer,
+    RetrieveCartProductsSerializer,
+)
 
 from carts.models import Cart, CartProduct
 from carts.permissions import IsOwnerCart
@@ -32,12 +39,22 @@ class CartView(CreateDestroyAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        try:
+            self.perform_create(serializer)
+        except NoProductsInStockError:
+            return Response(
+                {"message": "No more products in stock"},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        except ObjectDoesNotExist:
+            return Response(
+                {"message": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+            )
         headers = self.get_success_headers(serializer.data)
 
         products = CartProduct.objects.filter(cart=serializer.data["id"])
 
-        products = RetrieveProductsSerialize(products, many=True)
+        products = AddProductsInCartSerializer(products, many=True)
 
         return Response(
             {**serializer.data, "products": products.data},
@@ -55,6 +72,15 @@ class CartView(CreateDestroyAPIView):
         user = User.objects.get(email=self.request.user)
 
         cart = Cart.objects.get(user=user)
+
+        cart_products = CartProduct.objects.filter(cart=cart)
+
+        for product in cart_products:
+            print(50 * "=", product)
+            current_product = Products.objects.get(product_uuid=product.product_id)
+
+            current_product.stock.quantity += product.amount
+            current_product.stock.save()
 
         cart.products.clear()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -78,12 +104,12 @@ class RetrieveCartProductsView(generics.RetrieveAPIView):
 
         products = CartProduct.objects.filter(cart=cart)
 
-        products_serialized = RetrieveProductsSerialize(products, many=True)
-        instance = self.get_object()
+        products = RetrieveCartProductsSerializer(products, many=True)
 
+        instance = self.get_object()
         serializer = self.get_serializer(instance)
 
-        return Response({**serializer.data, "products": products_serialized.data})
+        return Response({**serializer.data, "products": products.data})
 
 
 class CartDeleteProductView(generics.DestroyAPIView):
@@ -96,16 +122,21 @@ class CartDeleteProductView(generics.DestroyAPIView):
     lookup_field = "product_id"
 
     def destroy(self, request, *args, **kwargs):
-        product = Products.objects.get(product_uuid=self.kwargs.get("product_id"))
+        try:
+            product = Products.objects.get(product_uuid=self.kwargs.get("product_id"))
+            cart = Cart.objects.get(user=self.request.user)
+            cart_product = CartProduct.objects.get(product=product)
+        except ObjectDoesNotExist:
+            return Response(
+                {"message": "Product not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
-        cart = Cart.objects.get(user=self.request.user)
-
-        cart_product = CartProduct.objects.get(product=product)
-
+        product.stock.quantity += 1
+        product.stock.save()
         if cart_product.amount > 1:
             cart_product.amount -= 1
             cart_product.save()
         else:
             cart.products.remove(product)
-
         return Response(status=status.HTTP_204_NO_CONTENT)
