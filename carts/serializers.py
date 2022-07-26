@@ -25,8 +25,32 @@ class CartSerializer(serializers.ModelSerializer):
         cart_user: Cart = Cart.objects.get(user=validated_data["user"])
 
         for product in validated_data["list_uuid"]:
-            new_product = Products.objects.get(product_uuid=product["product_uuid"])
-            cart_user.products.add(new_product)
-        return cart_user
+            new_product: Products = Products.objects.get(
+                product_uuid=product["product_uuid"]
+            )
+
+            quantity_in_stock = new_product.stock.quantity
+
+            if quantity_in_stock <= 1:
+                raise NoProductsInStockError()
+
+            new_product.stock.quantity -= 1
+            new_product.stock.save()
+            try:
+                product_cart: CartProduct = CartProduct.objects.get(
+                    product_id=new_product.product_uuid
+                )
+
+                product_cart.amount += 1
+                product_cart.save()
+                continue
+
+            except ObjectDoesNotExist:
+                mapped_product = {
+                    "price": new_product.price,
+                    "amount": 1,
+                    "cart": cart_user,
+                    "product": new_product,
+                }
 
 
