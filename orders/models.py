@@ -12,4 +12,4 @@ class OrderProducts(models.Model):
     value = models.DecimalField(max_digits=10, decimal_places=2)    
     order = models.ForeignKey("orders.Order", on_delete=models.CASCADE, related_name="order_products")
     product = models.ForeignKey("products.Products", on_delete=models.CASCADE, related_name="order_products")
-
+    amount = models.PositiveIntegerField(default=1)

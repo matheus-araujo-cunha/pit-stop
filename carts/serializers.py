@@ -73,7 +73,7 @@ class CartSerializer(serializers.ModelSerializer):
                     product_id=new_product.product_uuid
                 )
 
-                product_cart.amount += product["amount"]
+                product_cart.amount += 1
                 product_cart.save()
                 continue
 
