@@ -20,17 +20,11 @@ class ListOrdersView(ListCreateAPIView):
     serializer_class = OrderSerializer
     def perform_create(self, serializer):
         user: User = User.objects.get(email=self.request.user)
-        order = Order.objects.create(user=user)
-        try:
-            cart = Cart.objects.get(user=user)
-            for product in cart.products:
-                new_product = Products.objects.get(product_uuid=product)
-                OrderProducts.objects.create(order = order,product = new_product,value = new_product.price)
-            print(OrderProducts.objects.filter(order=order))
-            cart.products.clear()
-        except:
-            print("error")
-        serializer.save(user=user)
+        order = serializer.save(user=user)
+        cart = Cart.objects.get(user=user)
+        for product in cart.products.all():
+            OrderProducts.objects.create(order = order,product = product,value = product.price)
+        cart.products.clear()
 
 class RetrieveOrderView(RetrieveAPIView):
     queryset = Order.objects.all()

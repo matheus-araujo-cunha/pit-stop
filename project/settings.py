@@ -48,7 +48,7 @@ MY_APPS = [
     "carts",
     "stock",
     "products",
-    "order",
+    "orders",
 ]
 
 THIRD_PARTY_APPS = [
