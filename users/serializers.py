@@ -11,6 +11,12 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
+        user_authenticated = self.context["request"].user.name
+        user_admin = self.context["request"].user.is_superuser
+
+        if user_authenticated and user_admin:
+            return User.objects.create_superuser(**validated_data)
+
         return User.objects.create_user(**validated_data)
 
 
