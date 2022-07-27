@@ -10,7 +10,7 @@ from users.serializers import UserSerializer
 
 
 class ProductCartSerializer(serializers.Serializer):
-    product_uuid = serializers.UUIDField()
+    id = serializers.IntegerField()
 
 
 class AddProductsInCartSerializer(serializers.ModelSerializer):
@@ -32,7 +32,7 @@ class RetrieveCartProductsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartProduct
-        exclude = ["cart", "product"]
+        exclude = ["cart", "product", "id"]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -57,9 +57,7 @@ class CartSerializer(serializers.ModelSerializer):
         cart_user, _ = Cart.objects.get_or_create(user=validated_data["user"])
 
         for product in validated_data["list_uuid"]:
-            new_product: Products = Products.objects.get(
-                product_uuid=product["product_uuid"]
-            )
+            new_product: Products = Products.objects.get(id=product["id"])
 
             quantity_in_stock = new_product.stock.quantity
 
@@ -70,7 +68,7 @@ class CartSerializer(serializers.ModelSerializer):
             new_product.stock.save()
             try:
                 product_cart: CartProduct = CartProduct.objects.get(
-                    product_id=new_product.product_uuid
+                    product_id=new_product.id
                 )
 
                 product_cart.amount += 1

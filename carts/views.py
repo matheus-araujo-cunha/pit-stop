@@ -91,7 +91,7 @@ class CartView(RetrieveCreateDestroyAPIView):
 
         for product in cart_products:
             print(50 * "=", product)
-            current_product = Products.objects.get(product_uuid=product.product_id)
+            current_product = Products.objects.get(id=product.product_id)
 
             current_product.stock.quantity += product.amount
             current_product.stock.save()
@@ -114,7 +114,7 @@ class CartDeleteProductView(generics.DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         try:
-            product = Products.objects.get(product_uuid=self.kwargs.get("product_id"))
+            product = Products.objects.get(id=self.kwargs.get("product_id"))
             cart = Cart.objects.get(user=self.request.user)
             cart_product = CartProduct.objects.get(product=product)
         except ObjectDoesNotExist:
