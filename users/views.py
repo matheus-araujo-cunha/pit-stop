@@ -1,13 +1,24 @@
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView, Request, Response, status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from users.models import User
 from .serializers import LoginSerializer, UserSerializer
 
 
 class UserView(CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+
+class RetrieveUpdateUserView(RetrieveUpdateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permition_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
