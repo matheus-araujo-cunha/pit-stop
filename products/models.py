@@ -16,5 +16,3 @@ class Products(models.Model):
     stock = models.OneToOneField(
         "stock.Stock", on_delete=models.CASCADE, related_name="product"
     )
-
-    order = models.ManyToManyField("order.Order", related_name="products")
