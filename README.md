@@ -124,7 +124,7 @@ Necessário `TOKEN` para autentificação do usuário que está criadno o produt
 
 ```json
 {
-  "product_uuid": "f709847a-c475-4847-8d66-6f4dc7eb6ec8",
+  "id": "f709847a-c475-4847-8d66-6f4dc7eb6ec8",
   "name": "shell3",
   "description": "algo novo",
   "manufacturer": "manufaturado",
@@ -165,7 +165,7 @@ Não precisa do `TOKEN` de autenticação.
 ```json
 [
   {
-    "product_uuid": "e7724f7f-0bc2-41b3-86a7-03787047c101",
+    "id": "e7724f7f-0bc2-41b3-86a7-03787047c101",
     "name": "shell",
     "description": "algo novo",
     "manufacturer": "manufaturado",
@@ -186,7 +186,7 @@ Não precisa do `TOKEN` de autenticação.
 
 `localhost:8000/api/carts/`
 
-Requisição para adicionar um produto ao carrinho do usuário. Deve ser passado dentro de uma lista os "product_uuid" dos respectivos produto que ele deseja adiconar ao carrinho do usuário.
+Requisição para adicionar um produto ao carrinho do usuário. Deve ser passado dentro de uma lista os "ids" dos respectivos produtos que ele deseja adiconar ao carrinho do usuário.
 Autenticação de `TOKEN` necessária.
 
 `Requisição `
@@ -195,7 +195,7 @@ Autenticação de `TOKEN` necessária.
 {
   "list_products": [
     {
-      "product_uuid": "e7724f7f-0bc2-41b3-86a7-03787047c101"
+      "id": "e7724f7f-0bc2-41b3-86a7-03787047c101"
     }
   ]
 }
@@ -225,13 +225,13 @@ Autenticação de `TOKEN` necessária.
 
 `Resposta | status 400 Bad Request`
 
-Precisa passar um "product_uuid" para dentro do corpor da requisição ou voltará um Error 400.
+Precisa passar um "id" para dentro do corpor da requisição ou voltará um Error 400.
 
 ```json
 {
   "list_products": [
     {
-      "product_uuid": ["This field is required."]
+      "id": ["This field is required."]
     }
   ]
 }
