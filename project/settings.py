@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-from os import getenv
+from os import getenv, environ
 from dotenv import load_dotenv
+import dj_database_url
+
 
 load_dotenv()
 
@@ -29,7 +31,7 @@ SECRET_KEY = "django-insecure-n!0$p62r5c11$ez3yluq*%ba2j%s23^%*)f_*d%*0vw3wohrs@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["pitstop-api.herokuapp.com", "localhost"]
 
 
 # Application definition
@@ -48,7 +50,7 @@ MY_APPS = [
     "carts",
     "stock",
     "products",
-    "order",
+    "orders",
 ]
 
 THIRD_PARTY_APPS = [
@@ -102,6 +104,14 @@ DATABASES = {
         "PORT": getenv("PORT"),
     }
 }
+
+DATABASE_URL = environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    db_from_env = dj_database_url.config(
+        default=DATABASE_URL, conn_max_age=500, ssl_require=True
+    )
+    DATABASES["default"].update(db_from_env)
 
 
 # Password validation
