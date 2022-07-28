@@ -1,4 +1,3 @@
-from dataclasses import fields
 from rest_framework import serializers
 from products.models import Products
 from stock.serializers import StockSerializer

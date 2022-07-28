@@ -33,7 +33,6 @@ class RetrieveCreateDestroyAPIView(
 class CartView(RetrieveCreateDestroyAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
-
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
