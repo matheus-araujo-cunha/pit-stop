@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+import django.utils.timezone
 
 
 class Migration(migrations.Migration):
@@ -14,24 +15,25 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Cart',
+            name='Order',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('date', models.DateTimeField(default=django.utils.timezone.now)),
             ],
         ),
         migrations.CreateModel(
-            name='CartProduct',
+            name='OrderProducts',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('price', models.PositiveIntegerField()),
+                ('value', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('amount', models.PositiveIntegerField(default=1)),
-                ('cart', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='carts.cart')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='products.products')),
+                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='order_products', to='orders.order')),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='order_products', to='products.products')),
             ],
         ),
         migrations.AddField(
-            model_name='cart',
+            model_name='order',
             name='products',
-            field=models.ManyToManyField(related_name='carts', through='carts.CartProduct', to='products.products'),
+            field=models.ManyToManyField(related_name='orders', through='orders.OrderProducts', to='products.products'),
         ),
     ]
