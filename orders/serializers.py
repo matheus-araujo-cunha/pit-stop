@@ -10,19 +10,24 @@ from users.serializers import UserSerializer
 
 
 class OrderProductSerializer(serializers.Serializer):
-    product_uuid = serializers.UUIDField()
+    id = serializers.IntegerField()
     value = models.DecimalField(max_digits=10, decimal_places=2)
+
 
 class ProdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
-        exclude = ["stock","price","description"]
+        exclude = ["stock", "price", "description"]
+
 
 class OrderProdSerializer(serializers.ModelSerializer):
     product = ProdSerializer(many=False, read_only=True)
+
     class Meta:
         model = OrderProducts
-        fields = "__all__"
+        exclude = ["order", "id"]
+
+
 class OrderSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(read_only=True)
     # products = OrderProdSerializer(many=True,read_only=True)
@@ -30,4 +35,4 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["id","date","user"]
+        fields = ["id", "date", "user"]

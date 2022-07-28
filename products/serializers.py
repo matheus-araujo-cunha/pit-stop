@@ -10,7 +10,7 @@ class ProductsSerializer(serializers.ModelSerializer):
         depth = 1
         model = Products
         fields = (
-            "product_uuid",
+            "id",
             "name",
             "description",
             "manufacturer",

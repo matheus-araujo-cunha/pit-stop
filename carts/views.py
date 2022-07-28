@@ -21,7 +21,8 @@ from products.models import Products
 from users.models import User
 
 
-class CreateDestroyAPIView(
+class RetrieveCreateDestroyAPIView(
+    generics.RetrieveAPIView,
     generics.CreateAPIView,
     generics.DestroyAPIView,
     generics.GenericAPIView,
@@ -29,11 +30,24 @@ class CreateDestroyAPIView(
     pass
 
 
-class CartView(CreateDestroyAPIView):
+class CartView(RetrieveCreateDestroyAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        user = User.objects.get(email=self.request.user)
+
+        cart = Cart.objects.get(user=user)
+
+        products = CartProduct.objects.filter(cart=cart)
+
+        products = RetrieveCartProductsSerializer(products, many=True)
+
+        serializer = self.get_serializer(cart)
+
+        return Response({**serializer.data, "products": products.data})
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -76,7 +90,7 @@ class CartView(CreateDestroyAPIView):
 
         for product in cart_products:
             print(50 * "=", product)
-            current_product = Products.objects.get(product_uuid=product.product_id)
+            current_product = Products.objects.get(id=product.product_id)
 
             current_product.stock.quantity += product.amount
             current_product.stock.save()
@@ -86,29 +100,6 @@ class CartView(CreateDestroyAPIView):
 
     def perform_destroy(self, instance):
         return super().perform_destroy(instance)
-
-
-class RetrieveCartProductsView(generics.RetrieveAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    lookup_field = "id"
-
-    def retrieve(self, request, *args, **kwargs):
-        user = User.objects.get(email=self.request.user)
-
-        cart = Cart.objects.get(user=user)
-
-        products = CartProduct.objects.filter(cart=cart)
-
-        products = RetrieveCartProductsSerializer(products, many=True)
-
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-
-        return Response({**serializer.data, "products": products.data})
 
 
 class CartDeleteProductView(generics.DestroyAPIView):
@@ -122,7 +113,7 @@ class CartDeleteProductView(generics.DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         try:
-            product = Products.objects.get(product_uuid=self.kwargs.get("product_id"))
+            product = Products.objects.get(id=self.kwargs.get("product_id"))
             cart = Cart.objects.get(user=self.request.user)
             cart_product = CartProduct.objects.get(product=product)
         except ObjectDoesNotExist:
