@@ -38,5 +38,5 @@ class ListOrdersView(ListCreateAPIView):
         cart.products.clear()
 
 class RetrieveOrderView(RetrieveAPIView):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+    queryset = OrderProducts.objects.all()
+    serializer_class = OrderProdSerializer
