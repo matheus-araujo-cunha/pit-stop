@@ -8,7 +8,7 @@ Esse é um projeto Back End de um E-commerce, para armazenar produtos e efetuar 
 >
 > ### Post | Login
 
-`localhost:8000/api/users/login/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/users/login/`
 
 O usuário vai passar seu email e senha e recebera um Token de autenticação com status 200 OK.
 
@@ -31,7 +31,7 @@ O usuário vai passar seu email e senha e recebera um Token de autenticação co
 
 > ### Post | Criação de novo usuário.
 
-`localhost:8000/api/users/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/users/`
 
 Requisição para criar um novo usuário na plataforma.
 
@@ -58,7 +58,7 @@ Requisição para criar um novo usuário na plataforma.
 
 > ### Post | Criação de novo usuário ADM.
 
-`localhost:8000/api/users/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/users/`
 
 Apenas um usuário ADM pode criar outro usuário ADM.
 Necessário `TOKEN` de autenticação.
@@ -98,7 +98,7 @@ Se não houver `TOKEN` de autentificação.
 >
 > ### Post | Criação de um novo produto na plataforma.
 
-`localhost:8000/api/products/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/products/`
 
 Requisição para criar um novo produto na plataforma.
 Necessário `TOKEN` para autentificação do usuário que está criadno o produto. Apenas com um usuário ADM é permitido criar um novo produto. A propriedade "is_superuser" dever ser `TRUE`.
@@ -149,7 +149,7 @@ Se não houver `TOKEN` de autentificação.
 
 > ### GET | Listagem de produtos.
 
-`localhost:8000/api/products/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/products/`
 
 Requisição para listar os produtos da plataforma. Não é preciso autentificação para essa rota.
 
@@ -184,7 +184,7 @@ Não precisa do `TOKEN` de autenticação.
 >
 > ### Post | Adicionar um produto ao carrinho.
 
-`localhost:8000/api/carts/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/carts/`
 
 Requisição para adicionar um produto ao carrinho do usuário. Deve ser passado dentro de uma lista os "ids" dos respectivos produtos que ele deseja adiconar ao carrinho do usuário.
 Autenticação de `TOKEN` necessária.
@@ -239,7 +239,7 @@ Precisa passar um "id" para dentro do corpor da requisição ou voltará um Erro
 
 > ### GET | Pegar produtos do carrinho.
 
-`localhost:8000/api/carts/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/carts/`
 
 Requisição para listar os produtos dentro do carinho do usuário.
 Autenticação de `TOKEN` necessária.
@@ -270,7 +270,7 @@ Autenticação de `TOKEN` necessária.
 
 > ### DEL | Deletar produto especifico do carrinho.
 
-`localhost:8000/api/carts/products/e7724f7f-0bc2-41b3-86a7-03787047c101`
+`https://pitstop-api.herokuapp.com/api/:8000/api/carts/products/e7724f7f-0bc2-41b3-86a7-03787047c101`
 
 Requisição para remover produto especifico do carrinho. Precisa passar o "product_uuid" do produto desejado na URL.
 Autenticação de `TOKEN` necessária.
@@ -309,7 +309,7 @@ Se não houver `TOKEN` de autentificação.
 >
 > ### GET | Listar todas as ordens.
 
-`localhost:8000/api/order/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/order/`
 
 Lista os `ID` das ordem e os usuários que fizeram as requisições dessas ordens, assim como o horário que cada ordem foi feita. Autenticação de `TOKEN` necessária.
 
@@ -347,7 +347,7 @@ Se não houver `TOKEN` de autentificação.
 
 > ### GET | Pegar um ordem especifica.
 
-`localhost:8000/api/order/3`
+`https://pitstop-api.herokuapp.com/api/:8000/api/order/3`
 
 Deve pasar o `ID` da ordem que deseja pegar no final da URL.
 Autenticação de `TOKEN` necessária.
@@ -395,7 +395,7 @@ Se não houver `TOKEN` de autentificação.
 
 > ### POST | Criar uma nova ordem.
 
-`localhost:8000/api/order/`
+`https://pitstop-api.herokuapp.com/api/:8000/api/order/`
 
 Cria uma nova ordem com todos os produtos que estão no carrinho daquele usuário.
 Autenticação de `TOKEN` necessária.
@@ -452,4 +452,3 @@ Se não houver `TOKEN` de autentificação.
 > E é isso! Vamos ver nosso E-commerce.
 
 # Happy codin!!!
-
